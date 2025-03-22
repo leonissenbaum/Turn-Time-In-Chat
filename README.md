@@ -1,6 +1,6 @@
 A simple foundry module that displays the length of turns in chat!
 
-<video src="https://github.com/leonissenbaum/Turn-Time-In-Chat/raw/main/Demo.mp4" controls width="600"></video>
+https://github.com/user-attachments/assets/06911bf9-a053-434a-b8c8-8f83d09ade64
 
 Supports the following options:
 
