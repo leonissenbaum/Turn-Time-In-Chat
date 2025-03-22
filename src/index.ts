@@ -13,9 +13,9 @@ interface TurnTimeData {
 
 Hooks.once('init', () => {
   console.log(`${MODULE_ID} | Initializing Turn Time In Chat`);
-    // Register module settings
     if (!game.settings) return;
 
+    // Register module settings
     game.settings.register(MODULE_ID as any, "minimumTurnLength" as any, {
         name: "Minimum Time To Post (seconds)",
         hint: "Doesn't post turns shorter than this (in seconds). Set to 0 to post all turns.",
