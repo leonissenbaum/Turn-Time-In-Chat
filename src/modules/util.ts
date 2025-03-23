@@ -68,3 +68,18 @@ export function formatTime(ms: number): string {
     return parts.join(', ');
   }
 }
+
+export function updateCombatFlag(combat: Combat, flag: string, update: unknown) {
+  if (game.user?.isGM) {
+    //this does leave me open to a minor race condition, but whatever
+    //this can error out if the combat is over (this is async)
+    combat.setFlag("turn-time-in-chat", flag as any, update).catch(undefined => {})
+  } else {
+    game.socket?.emit('module.turn-time-in-chat', {
+      action: 'updateCombatFlag',
+      combatId: combat.id,
+      flag: flag,
+      value: update
+    });
+  }
+}

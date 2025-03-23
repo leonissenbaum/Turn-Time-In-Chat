@@ -1,0 +1,57 @@
+<div class="combat-timer-container">
+    {{#if hasActiveCombat}}
+      <h2>Encounter Status</h2>
+      <div class="timer-stats">
+        <div class="timer-stat">
+          <label>Current Turn:</label>
+          <span>{{currentCombatant.name}}</span>
+        </div>
+        <div class="timer-stat">
+          <label>Turn Duration:</label>
+          <span>{{turnElapsed}}</span>
+        </div>
+        <div class="timer-stat">
+          <label>Round Duration:</label>
+          <span>{{roundElapsed}}</span>
+        </div>
+        <div class="timer-stat">
+          <label>Combat Duration:</label>
+          <span>{{combatElapsed}}</span>
+        </div>
+      </div>
+      
+      <table class="turn-history">
+        <thead>
+          <tr>
+            <th>Character</th>
+            <th>Turn Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each turns}}
+          <tr>
+            <td>{{this.name}}</td>
+            <td>{{this.turnLength}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{#if isGM}}
+        {{#if messagesDisabled}}
+          <div class="form-group">
+            <button type="button" class="enable-messages">
+              <i class="fas fa-sync"></i> Enable Timer Messages
+            </button>
+          </div>
+        {{else}}
+          <div class="form-group">
+            <button type="button" class="disable-messages">
+              <i class="fas fa-sync"></i> Disable Timer Messages
+            </button>
+          </div>
+        {{/if}}
+      {{/if}}
+    {{else}}
+      <p>No active combat found.</p>
+    {{/if}}
+  </div>
