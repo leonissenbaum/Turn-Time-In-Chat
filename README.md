@@ -4,7 +4,7 @@ https://github.com/user-attachments/assets/d0927631-b101-4587-87bd-22912c0c033d
 
 Supports the following options:
 
-Compact messages (Defaults to true)
+Compact messages (Defaults to true)  
 Minimum turn length to post  (Defaults to 5 seconds)  
 Post things in chat (Defaults to true)  
 Let players see the encounter timer button that logs times (defaults to true)  
