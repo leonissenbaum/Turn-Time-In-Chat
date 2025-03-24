@@ -18,6 +18,16 @@ Hooks.once('init', () => {
   if (!game.settings) return;
 
   // Register module settings
+
+  game.settings.register(MODULE_ID as any, "compactMessages" as any, {
+    name: "Compact Messages",
+    hint: "When enabled, the messages in chat are made far more compact.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+  } as any);
+
   game.settings.register(MODULE_ID as any, "minimumTurnLength" as any, {
       name: "Minimum Time To Track (seconds)",
       hint: "Doesn't track turns shorter than this. Set to 0 to track all turns.",
@@ -270,3 +280,52 @@ Hooks.on('renderCombatTracker', (app: Application, html: JQuery, data: any) => {
     new CombatTimerApp({combatId: data?.combat?.id}).render(true);
   });
 });
+
+// Portions of the code below based on health-monitor 
+// Copyright (c) 2021 jessev14
+// https://github.com/jessev14/health-monitor
+// Licensed under the MIT License
+// Open source is the best!
+
+// Apply custom CSS to chat messages
+Hooks.on("renderChatMessage", (app: Application, html: JQuery, data: any) => {
+  const message = html.find(`.turn-time-message-compact`);
+  if (!message.length) return;
+
+  html.css("text-align", "center");
+  html.css("margin", "2px");
+  html.css("padding", "2px");
+  html.find(".message-sender").text("");
+  html.find(".message-metadata")[0].style.display = "none";
+  
+
+  // add trash icon
+  // this was super annoying to do properly btw, i should learn frontend at some point
+  if (game.user?.isGM) {
+    const messageDiv = html.find(`div.turn-time-message-compact`);
+    messageDiv.css("position", "relative");
+    
+    // First wrap the content in a div that keeps centering
+    const content = messageDiv.html();
+    messageDiv.html(`<div class="centered-content">${content}</div>`);
+    
+    // Add the trash icon
+    messageDiv.append(`<span><a class="button message-header message-delete"><i class="fas fa-trash"></i></a></span>`);
+    
+    // Position the trash icon
+    html.find(`a.message-delete`).closest(`span`).css({
+        "position": "absolute",
+        "right": "4px",
+        "top": "0px",
+        "font-size": "var(--font-size-12)"
+    });
+    
+    // Apply styles to prevent overlap without affecting centering
+    messageDiv.find(".centered-content").css({
+        "display": "inline-block",
+        "max-width": "calc(100% - 20px)",
+        "text-align": "center"
+    });
+  }
+});
+  
