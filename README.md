@@ -1,6 +1,6 @@
 A foundry module that displays the length of turns in chat! To help you encourage your players to take their turn faster, or to figure out why a 4 round combat lasts 5 hours.
 
-https://github.com/user-attachments/assets/839ca507-279b-42d1-bd67-f38b5bee2a03
+https://github.com/user-attachments/assets/d0927631-b101-4587-87bd-22912c0c033d
 
 Supports the following options:
 
