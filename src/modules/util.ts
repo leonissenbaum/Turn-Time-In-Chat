@@ -148,3 +148,43 @@ export function updateCombatFlag(combat: Combat, flag: string, update: unknown) 
     });
   }
 }
+
+export function sendChatMessage(chatMessage: {options?: Object, message: string, isPrivate?: boolean, compact?: boolean}) {
+  let div = "turn-time-message"
+  if (chatMessage.compact)
+    div = "turn-time-message-compact"
+
+  const privatMessageConfig = (game.settings as any).get('turn-time-in-chat' as any, "messagesGMOnly" as any) as boolean;
+  if (privatMessageConfig === true) {
+    chatMessage.isPrivate = true
+  }
+
+  if (chatMessage.isPrivate) {
+    if (game.user?.isGM) {
+      ChatMessage.create({
+        content: `
+          <div class="${div}">
+            ${chatMessage.message}
+          </div>
+        `,
+        whisper: ChatMessage.getWhisperRecipients("GM") as Array<any>,
+        ...chatMessage.options
+      });
+    }
+    else {
+      game.socket?.emit('module.turn-time-in-chat', {
+        action: 'sendPrivateMessage',
+        message: JSON.stringify(chatMessage)
+      });
+    }
+  } else {
+    ChatMessage.create({
+      content: `
+        <div class="${div}">
+          ${chatMessage.message}
+        </div>
+      `,
+      ...chatMessage.options
+    });
+  }
+}

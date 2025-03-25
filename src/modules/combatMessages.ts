@@ -1,4 +1,4 @@
-import { formatTime, formatTimeCompact, updateCombatFlag } from "./util.ts";
+import { formatTime, formatTimeCompact, sendChatMessage, updateCombatFlag } from "./util.ts";
 
 export function postTurnMessage(combat: Combat) {
   let skipPost = false
@@ -49,49 +49,26 @@ export function postTurnMessage(combat: Combat) {
     }
     else if (!skipPost && hideNonPlayerNames) {
       if (compactMessages) {
-        ChatMessage.create({
-          content: `
-          <div class="turn-time-message-compact">
-            The creature's turn took ${compactFormattedTurnTime}.
-          </div>
-        `,
-      } as any);
-    } else {
-      ChatMessage.create({
-        content: `
-          <div class="turn-time-message">
-            The creature's turn took ${formattedTurnTime}.
-          </div>
-        `,
-        speaker: ChatMessage.getSpeaker({actor: combatant.actor, scene: combat.scene, token: combatant.token, alias: 'Turn Length'}),
-        type: CONST.CHAT_MESSAGE_STYLES.OTHER
-    } as any);
-    }
-      skipRegularPost = true
+        sendChatMessage({message: `The creature's turn took ${compactFormattedTurnTime}.`, compact: true})
+      } else {
+        sendChatMessage({message: `The creature's turn took ${formattedTurnTime}.`, options: {
+          speaker: ChatMessage.getSpeaker({actor: combatant.actor, scene: combat.scene, token: combatant.token, alias: 'Turn Length'}),
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER
+        }})
+      }
+    skipRegularPost = true
     }
   }
   
   if (!skipRegularPost) {
     // Post turn time info to chat
     if (compactMessages) {
-      ChatMessage.create({
-        content: `
-          <div class="turn-time-message-compact">
-            ${combatant.name}'s turn took ${compactFormattedTurnTime}.
-          </div>
-        `,
-      } as any);
+      sendChatMessage({message: `${combatant.name}'s turn took ${compactFormattedTurnTime}.`, compact: true})
     } else {
-      ChatMessage.create({
-        content: `
-          <div class="turn-time-message">
-            ${combatant.name}'s turn took ${formattedTurnTime}.
-          </div>
-        `,
+      sendChatMessage({message: `${combatant.name}'s turn took ${formattedTurnTime}.`, options: {
         speaker: ChatMessage.getSpeaker({actor: combatant.actor, scene: combat.scene, token: combatant.token, alias: combatant.actor?.name ?? "Turn Length"}),
         type: CONST.CHAT_MESSAGE_STYLES.OTHER
-      } as any);
-
+      }})
     }
   }
 
@@ -144,25 +121,15 @@ export function postCombatRoundMessage(combat: Combat) {
   if (!skipPost) {
     // Post round time info to chat
     if (compactMessages) {
-      ChatMessage.create({
-        content: `
-          <div class="turn-time-message-compact">
-            Round ${combat.round} completed. Round duration:<br>
-            ${formattedRoundTime}.
-          </div>
-        `
-      } as any);
+      sendChatMessage({
+        message: `Round ${combat.round} completed. Round duration:<br>${formattedRoundTime}.`, compact: true
+      })
     } else {
-      ChatMessage.create({
-        content: `
-          <div class="turn-time-message">
-            <h3>Round ${combat.round} completed</h3>
-            <p>Round duration: ${formattedRoundTime}.</p>
-          </div>
-        `,
-        speaker: {alias: 'Turn Length'},
-        type: CONST.CHAT_MESSAGE_STYLES.OTHER
-      } as any);
+      sendChatMessage({
+        message: `<h3>Round ${combat.round} completed</h3><p>Round duration: ${formattedRoundTime}.</p>`, options: {
+          speaker: {alias: 'Turn Length'},
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      }})
     }
   }
   
@@ -196,28 +163,15 @@ export function postEndCombatMessage(combat: Combat) {
 
   if (!postCharacterTurns) {
     if (compactMessages) {
-      return ChatMessage.create({
-        content: `
-          <div class="turn-time-message-compact">
-            Encounter complete. Encounter length:<br>
-            ${formattedTotalTime}.
-          </div>
-        `,
-        speaker: {alias: 'Turn Length'},
-        type: CONST.CHAT_MESSAGE_STYLES.OTHER
-      } as any);
+      return sendChatMessage({
+        message: `Encounter complete. Encounter length:<br>${formattedTotalTime}.`, compact: true
+      })
     } else {
-      return ChatMessage.create({
-        content: `
-          <div class="turn-time-message">
-            <h3>Encounter complete</h3>
-            <p>Total length of encounter: ${formattedTotalTime}.</p>
-          </div>
-        `,
-        speaker: {alias: 'Turn Length'},
-        type: CONST.CHAT_MESSAGE_STYLES.OTHER
-      } as any);
-
+      return sendChatMessage({
+        message: `<h3>Encounter complete</h3><p>Total length of encounter: ${formattedTotalTime}.</p>`, options: {
+          speaker: {alias: 'Turn Length'},
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      }})
     }
   }
   
@@ -252,17 +206,14 @@ export function postEndCombatMessage(combat: Combat) {
   }
   
   // Post combat end time info to chat with turn lengths table
-  ChatMessage.create({
-    content: `
-      <div class="turn-time-message">
-        <h3>Encounter ended</h3>
+  sendChatMessage({
+    message: `<h3>Encounter ended</h3>
         <p>Total length of encounter: ${formattedTotalTime}.</p>
         ${sortedTurnLengths.length > 0 ? `
         ${turnLengthsTable}
-        ` : ''}
-      </div>
-    `,
-    speaker: {alias: 'Turn Length'},
-    type: CONST.CHAT_MESSAGE_STYLES.OTHER
-  } as any);
+        ` : ''}`,
+      options: {
+        speaker: {alias: 'Turn Length'},
+        type: CONST.CHAT_MESSAGE_STYLES.OTHER
+  }})
 }

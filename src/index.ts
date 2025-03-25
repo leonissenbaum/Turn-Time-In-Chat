@@ -2,7 +2,7 @@
 
 import { postTurnMessage, postCombatRoundMessage, postEndCombatMessage } from "./modules/combatMessages.ts";
 import { CombatTimerApp } from "./modules/combatTimerApp.ts";
-import { updateCombatFlag } from "./modules/util.ts";
+import { sendChatMessage, updateCombatFlag } from "./modules/util.ts";
 
 // Define module ID constant
 const MODULE_ID = 'turn-time-in-chat';
@@ -44,7 +44,16 @@ Hooks.once('init', () => {
     config: true,
     type: Boolean,
     default: true,
-} as any);
+  } as any);
+
+  game.settings.register(MODULE_ID as any, "messagesGMOnly" as any, {
+    name: "Make all messages GM only",
+    hint: "When enabled, all messages will be sent to the DM alone, and players won't be able to see any chat messages.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  } as any);
 
   game.settings.register(MODULE_ID as any, "playersSeeTimerButton" as any, {
     name: "Let players see the Encounter Timer Button",
@@ -187,6 +196,7 @@ Hooks.once('ready', () => {
   });
   game.socket?.on(`module.${MODULE_ID}`, async (data) => {
     if (!game.users?.activeGM?.isSelf) return;
+
     if (data.action === 'updateCombatFlag') {
       const combat = game.combats?.get(data.combatId);
       if (combat) {
@@ -195,6 +205,10 @@ Hooks.once('ready', () => {
         } catch {}
       }
     } 
+    
+    else if (data.action === 'sendPrivateMessage') {
+      sendChatMessage(JSON.parse(data.message))
+    }
   })
 });
 
@@ -211,27 +225,23 @@ Hooks.on('combatStart', (combat: Combat) => {
   
   // Announce combat start - whispered to GM only with confirmation button
   if (chatEnabled) {
-    ChatMessage.create({
-      content: `
-        <h3>Combat Started</h3>
+    sendChatMessage({message: 
+      `<h3>Combat Started</h3>
         <p>Sending messages for this encounter.</p>
-        <button type="button" class="disable-combat-timer" data-combat-id="${combat.id}">Disable Timer Messages For This Encounter</button>
-      `,
-      speaker: {alias: 'Turn Length'},
-      type: CONST.CHAT_MESSAGE_STYLES.OTHER,
-      whisper: ChatMessage.getWhisperRecipients('GM')
-    } as any);
+        <button type="button" class="disable-combat-timer" data-combat-id="${combat.id}">Disable Timer Messages For This Encounter</button>`
+      , options: {
+          speaker: {alias: 'Turn Length'},
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER,
+      }, isPrivate: true})
   } else {
-    ChatMessage.create({
-      content: `
-        <h3>Combat Started</h3>
+    sendChatMessage({message: 
+      `<h3>Combat Started</h3>
         <p>Not sending messages for this encounter.</p>
-        <button type="button" class="enable-combat-timer" data-combat-id="${combat.id}">Enable Timer Messages For This Encounter</button>
-      `,
-      speaker: {alias: 'Turn Length'},
-      type: CONST.CHAT_MESSAGE_STYLES.OTHER,
-      whisper: ChatMessage.getWhisperRecipients('GM')
-    } as any);
+        <button type="button" class="enable-combat-timer" data-combat-id="${combat.id}">Enable Timer Messages For This Encounter</button>`
+      , options: {
+          speaker: {alias: 'Turn Length'},
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER,
+      }, isPrivate: true})
   }
 });
 
@@ -297,8 +307,8 @@ Hooks.on("renderChatMessage", (app: Application, html: JQuery, data: any) => {
   html.css("padding", "2px");
   html.find(".message-sender").text("");
   html.find(".message-metadata")[0].style.display = "none";
+  html.find(".whisper-to")[0].style.display = "none";
   
-
   // add trash icon
   // this was super annoying to do properly btw, i should learn frontend at some point
   if (game.user?.isGM) {
