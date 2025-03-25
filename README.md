@@ -7,6 +7,7 @@ Supports the following options:
 Compact messages (Defaults to true)  
 Minimum turn length to post  (Defaults to 5 seconds)  
 Post things in chat (Defaults to true)  
+Make all messages GM only (Defaults to false)
 Let players see the encounter timer button that logs times (defaults to true)  
 Hiding non-player turn lengths  (Defaults to false)  
 Hiding non-player names  (Defaults to false)  
